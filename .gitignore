@@ -1,0 +1,22 @@
+# Data directories
+data/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Output files
+sample_images.png
+*.png
+
+# IDE and environment
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+venv/
+env/
+.env
+
