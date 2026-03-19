@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from data_loader import load_cifar10, get_dataset_info
 from model import SimpleCNN
+from training import TrainingConfig, train_model, plot_training_curves, load_history
 
 # Load data
 print("Loading CIFAR10 dataset...")
@@ -71,5 +72,41 @@ predictions = torch.argmax(output, dim=1)
 print(f"\nPredicted classes for first batch: {predictions[:8]}")
 print(f"Actual classes for first batch: {labels[:8]}")
 
-print("\n✓ Model test successful!")
+print("\n[OK] Model test successful!")
+
+# ============================================================
+# TRAINING PHASE
+# ============================================================
+print("\n" + "="*50)
+print("TRAINING MODEL")
+print("="*50)
+
+# Setup training configuration
+config = TrainingConfig(checkpoint_name="iteration3_model")
+print(f"Device: {config.device}")
+print(f"Learning rate: {config.learning_rate}")
+print(f"Num epochs: {config.num_epochs}")
+print(f"Patience: {config.patience}")
+
+# Reset model and move to device
+model = SimpleCNN()
+model = model.to(config.device)
+
+# Train the model
+print("\nStarting training...")
+model, history = train_model(model, train_loader, val_loader, config)
+
+# Plot training curves
+print("\nPlotting training curves...")
+plot_training_curves(history, save_path="checkpoints/iteration3_training_curves.png")
+
+# Display final metrics
+print("\n" + "="*50)
+print("TRAINING SUMMARY")
+print("="*50)
+print(f"Final training loss: {history['train_loss'][-1]:.4f}")
+print(f"Final validation loss: {history['val_loss'][-1]:.4f}")
+print(f"Best validation accuracy: {max(history['val_accuracy']):.2f}%")
+print(f"Final validation accuracy: {history['val_accuracy'][-1]:.2f}%")
+print("="*50)
 
