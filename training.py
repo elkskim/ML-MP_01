@@ -138,7 +138,15 @@ def plot_training_curves(history, save_path="checkpoints/training_curves.png"):
     axes[0].set_ylabel('Loss')
     axes[0].set_title('Training and Validation Loss')
     axes[0].legend()
-    # ...existing code...
+    axes[0].grid(True, alpha=0.3)
+    
+    # Plot validation accuracy
+    axes[1].plot(history['val_accuracy'], label='Validation Accuracy', marker='o', color='green')
+    axes[1].set_xlabel('Epoch')
+    axes[1].set_ylabel('Accuracy (%)')
+    axes[1].set_title('Validation Accuracy')
+    axes[1].legend()
+    axes[1].grid(True, alpha=0.3)
     
     plt.tight_layout()
     plt.savefig(save_path, dpi=100)
