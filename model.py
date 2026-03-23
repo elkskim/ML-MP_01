@@ -10,11 +10,15 @@ class SimpleCNN(nn.Module):
     - Conv2d(32→64) + ReLU + MaxPool
     - Conv2d(64→128) + ReLU + MaxPool
     - Flatten
-    - Linear(2048→256) + ReLU
-    - Linear(256→10)
+    - Linear(2048→256) + ReLU + Dropout
+    - Linear(256→10) + Dropout
+    
+    Args:
+        dropout_p1: Dropout probability after first FC layer (default: 0.5)
+        dropout_p2: Dropout probability after second FC layer (default: 0.3)
     """
     
-    def __init__(self):
+    def __init__(self, dropout_p1=0.5, dropout_p2=0.3):
         super(SimpleCNN, self).__init__()
         
         # Convolutional layers
@@ -35,7 +39,9 @@ class SimpleCNN(nn.Module):
         # So flattened size is 4 * 4 * 128 = 2048
         self.fc1 = nn.Linear(128 * 4 * 4, 256)
         self.relu4 = nn.ReLU()
+        self.dropout1 = nn.Dropout(dropout_p1)  # Configurable dropout
         self.fc2 = nn.Linear(256, 10)  # 10 classes in CIFAR10
+        self.dropout2 = nn.Dropout(dropout_p2)  # Configurable dropout
     
     def forward(self, x):
         """
@@ -65,10 +71,14 @@ class SimpleCNN(nn.Module):
         # Flatten for fully connected layers
         x = x.view(x.size(0), -1)
         
-        # Fully connected layers
+        # Fully connected layers with dropout
         x = self.fc1(x)
         x = self.relu4(x)
+        x = self.dropout1(x)  # Apply dropout after ReLU activation
+        
         x = self.fc2(x)
+        # Note: No ReLU after fc2 since it's the output layer
+        x = self.dropout2(x)  # Apply dropout after output layer
         
         return x
 
