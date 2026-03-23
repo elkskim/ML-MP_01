@@ -1,0 +1,47 @@
+# Quick Navigation Card
+
+## 📍 Where to Go (The 30-Second Version)
+
+```
+NEED:                              READ:
+─────────────────────────────────────────────────────────────
+To present tomorrow       →  Documentation/02_PRESENTATION_GUIDE.md
+To understand curves      →  Documentation/01_CURVES_GUIDE.md
+To do fine-tuning         →  Documentation/FINE_TUNING_GUIDE.md
+To use Google Colab       →  Documentation/COLAB_GUIDE.md
+Confused about anything   →  Documentation/START_HERE.md
+```
+
+## 🎯 What's Where
+
+- **Code**: Python files in root directory
+- **Documentation**: 5 guides in Documentation/ folder
+- **Results**: Curves and metrics in checkpoints/ folder
+- **Data**: CIFAR-10 dataset in data/ folder
+
+## ⚡ Fast Track
+
+1. Open: `Documentation/START_HERE.md`
+2. Pick your goal from the decision tree
+3. Read the recommended guide (15-30 min)
+4. You're ready!
+
+## 📊 Key Numbers (Memorize These!)
+
+- **Test Accuracy**: 73.97%
+- **Best Validation**: 74.28%
+- **Training Epochs**: 14
+- **Best Class**: Automobiles (86%)
+- **Worst Class**: Cats (52%)
+
+## ✅ Project Status
+
+- ✅ Model trained and evaluated
+- ✅ 5 focused documentation guides
+- ✅ Ready for presentation
+- ✅ Ready for fine-tuning (if desired)
+
+---
+
+**Start with**: `Documentation/START_HERE.md` 👈
+

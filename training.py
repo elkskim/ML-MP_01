@@ -3,6 +3,8 @@ from torch import nn
 import os
 import json
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+import numpy as np
 
 
 # Create checkpoints directory if it doesn't exist
@@ -136,19 +138,125 @@ def plot_training_curves(history, save_path="checkpoints/training_curves.png"):
     axes[0].set_ylabel('Loss')
     axes[0].set_title('Training and Validation Loss')
     axes[0].legend()
-    axes[0].grid(True, alpha=0.3)
-    
-    # Plot accuracy
-    axes[1].plot(history['val_accuracy'], label='Validation Accuracy', marker='s', color='green')
-    axes[1].set_xlabel('Epoch')
-    axes[1].set_ylabel('Accuracy (%)')
-    axes[1].set_title('Validation Accuracy')
-    axes[1].legend()
-    axes[1].grid(True, alpha=0.3)
+    # ...existing code...
     
     plt.tight_layout()
     plt.savefig(save_path, dpi=100)
     print(f"[OK] Training curves saved to: {save_path}")
     plt.close()
 
+
+def evaluate_model(model, test_loader, device, classes=None, save_path=None):
+    """
+    Evaluate model on test set and return detailed metrics.
+    
+    Args:
+        model: Trained model
+        test_loader: Test data loader
+        device: Device to use (cuda/cpu)
+        classes: List of class names
+        save_path: Path to save evaluation report
+    
+    Returns:
+        Dictionary with test_accuracy, predictions, and labels
+    """
+    model.eval()
+    all_preds = []
+    all_labels = []
+    correct = 0
+    total = 0
+    test_loss = 0
+    
+    criterion = nn.CrossEntropyLoss()
+    
+    print("\n" + "="*50)
+    print("EVALUATING MODEL ON TEST SET")
+    print("="*50)
+    
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+            
+            test_loss += loss.item()
+            _, predicted = torch.max(outputs.data, 1)
+            
+            correct += (predicted == labels).sum().item()
+            total += labels.size(0)
+            
+            all_preds.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
+    
+    test_accuracy = 100 * correct / total
+    avg_test_loss = test_loss / len(test_loader)
+    
+    print(f"\nTest Accuracy: {test_accuracy:.2f}%")
+    print(f"Test Loss: {avg_test_loss:.4f}")
+    print(f"Correct Predictions: {correct}/{total}")
+    
+    # Detailed classification report
+    if classes:
+        print("\n" + "-"*50)
+        print("CLASSIFICATION REPORT")
+        print("-"*50)
+        report = classification_report(all_labels, all_preds, target_names=classes)
+        print(report)
+        
+        # Save report if path provided
+        if save_path:
+            with open(save_path, 'w') as f:
+                f.write(f"Test Accuracy: {test_accuracy:.2f}%\n")
+                f.write(f"Test Loss: {avg_test_loss:.4f}\n")
+                f.write(f"Correct Predictions: {correct}/{total}\n\n")
+                f.write("CLASSIFICATION REPORT\n")
+                f.write("-"*50 + "\n")
+                f.write(report)
+    
+    return {
+        'test_accuracy': test_accuracy,
+        'test_loss': avg_test_loss,
+        'predictions': all_preds,
+        'labels': all_labels,
+        'correct': correct,
+        'total': total
+    }
+
+
+def plot_confusion_matrix(all_labels, all_preds, classes, save_path=None):
+    """Plot and save confusion matrix"""
+    cm = confusion_matrix(all_labels, all_preds)
+    
+    fig, ax = plt.subplots(figsize=(12, 10))
+    im = ax.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    
+    ax.set_title('Confusion Matrix', fontsize=16, fontweight='bold')
+    plt.colorbar(im, ax=ax)
+    
+    tick_marks = np.arange(len(classes))
+    ax.set_xticks(tick_marks)
+    ax.set_yticks(tick_marks)
+    ax.set_xticklabels(classes, rotation=45, ha='right')
+    ax.set_yticklabels(classes)
+    
+    ax.set_ylabel('True Label', fontsize=12)
+    ax.set_xlabel('Predicted Label', fontsize=12)
+    
+    # Add text annotations
+    thresh = cm.max() / 2.
+    for i in range(cm.shape[0]):
+        for j in range(cm.shape[1]):
+            ax.text(j, i, format(cm[i, j], 'd'),
+                   ha="center", va="center",
+                   color="white" if cm[i, j] > thresh else "black",
+                   fontsize=9)
+    
+    plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=100, bbox_inches='tight')
+        print(f"[OK] Confusion matrix saved to: {save_path}")
+    
+    plt.close()
+    return cm
 
